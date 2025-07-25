@@ -2,8 +2,6 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { CircleCheckIcon, CircleHelpIcon, CircleIcon } from "lucide-react";
-
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -13,107 +11,106 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import { Button } from "@/components/ui/button";
+import { FolderOpen, Cloud } from "lucide-react";
+import { ThemeToggle } from "./theme-toggle";
+import Image from "next/image";
 
-const components: { title: string; href: string; description: string }[] = [
+// Navigation Items
+const navigationItems = [
   {
-    title: "Alert Dialog",
-    href: "/docs/primitives/alert-dialog",
-    description:
-      "A modal dialog that interrupts the user with important content and expects a response.",
+    title: "Local Files",
+    href: "/local",
+    description: "Browse files on your local system",
+    icon: FolderOpen,
   },
   {
-    title: "Hover Card",
-    href: "/docs/primitives/hover-card",
-    description:
-      "For sighted users to preview content available behind a link.",
-  },
-  {
-    title: "Progress",
-    href: "/docs/primitives/progress",
-    description:
-      "Displays an indicator showing the completion progress of a task, typically displayed as a progress bar.",
-  },
-  {
-    title: "Scroll-area",
-    href: "/docs/primitives/scroll-area",
-    description: "Visually or semantically separates content.",
-  },
-  {
-    title: "Tabs",
-    href: "/docs/primitives/tabs",
-    description:
-      "A set of layered sections of content—known as tab panels—that are displayed one at a time.",
-  },
-  {
-    title: "Tooltip",
-    href: "/docs/primitives/tooltip",
-    description:
-      "A popup that displays information related to an element when the element receives keyboard focus or the mouse hovers over it.",
+    title: "Cloud Storage",
+    href: "/cloud",
+    description: "Access files from cloud services",
+    icon: Cloud,
   },
 ];
 
+// Navbar
 export function Navbar() {
   return (
-    <NavigationMenu viewport={true}>
-      <NavigationMenuList>
-        <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-          <Link href="/docs">Docs</Link>
-        </NavigationMenuLink>
+    <nav className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between">
+          {/* Desktop Navigation */}
+          <div className="flex items-center gap-4">
+            <NavigationMenu>
+              <NavigationMenuList>
+                {/* Docs */}
+                <NavigationMenuItem>
+                  <NavigationMenuLink
+                    href="https://github.com/abhimehrr/code-explorer"
+                    target="_blank"
+                    className={navigationMenuTriggerStyle()}
+                  >
+                    Docs
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
 
-        <NavigationMenuItem>
-          <NavigationMenuTrigger>List</NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <ul className="grid w-[300px] gap-4">
-              <li>
-                <NavigationMenuLink asChild>
-                  <Link href="#">
-                    <div className="font-medium">Components</div>
-                    <div className="text-muted-foreground">
-                      Browse all components in the library.
-                    </div>
-                  </Link>
-                </NavigationMenuLink>
-                <NavigationMenuLink asChild>
-                  <Link href="#">
-                    <div className="font-medium">Documentation</div>
-                    <div className="text-muted-foreground">
-                      Learn how to use the library.
-                    </div>
-                  </Link>
-                </NavigationMenuLink>
-                <NavigationMenuLink asChild>
-                  <Link href="#">
-                    <div className="font-medium">Blog</div>
-                    <div className="text-muted-foreground">
-                      Read our latest blog posts.
-                    </div>
-                  </Link>
-                </NavigationMenuLink>
-              </li>
-            </ul>
-          </NavigationMenuContent>
-        </NavigationMenuItem>
-      </NavigationMenuList>
-    </NavigationMenu>
-  );
-}
+                {/* Browse */}
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger>Browse</NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                      {navigationItems.map((item) => {
+                        const Icon = item.icon;
+                        return (
+                          <li key={item.title}>
+                            <NavigationMenuLink
+                              href={item.href}
+                              className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                            >
+                              <div className="flex items-center space-x-2">
+                                <Icon className="h-4 w-4" />
+                                <div className="text-sm font-medium leading-none">
+                                  {item.title}
+                                </div>
+                              </div>
+                              <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                                {item.description}
+                              </p>
+                            </NavigationMenuLink>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+          </div>
 
-function ListItem({
-  title,
-  children,
-  href,
-  ...props
-}: React.ComponentPropsWithoutRef<"li"> & { href: string }) {
-  return (
-    <li {...props}>
-      <NavigationMenuLink asChild>
-        <Link href={href}>
-          <div className="text-sm leading-none font-medium">{title}</div>
-          <p className="text-muted-foreground line-clamp-2 text-sm leading-snug">
-            {children}
-          </p>
-        </Link>
-      </NavigationMenuLink>
-    </li>
+          {/* Right side actions */}
+          <div className="flex items-center gap-3">
+            {/* Share Button */}
+            <Button
+              variant="outline"
+              size="icon"
+              className="hidden sm:flex size-8"
+              asChild
+            >
+              <Link href="https://github.com/code-explorer" target="_blank">
+                <Image
+                  src={"/github-mark-white.png"}
+                  alt="Github"
+                  width={20}
+                  height={20}
+                  className="size-4"
+                />
+              </Link>
+            </Button>
+
+            {/* Theme Toggle */}
+            <ThemeToggle />
+          </div>
+        </div>
+      </div>
+    </nav>
   );
 }
