@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { Fragment, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,6 +11,7 @@ import {
   Settings,
   FileText,
   Code,
+  XIcon,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -18,7 +19,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  getFileFromExtension,
+  FileIcon,
+} from "@/components/file-explorer/file-icon";
 
+// Interface for the CodeViewer component
 interface CodeViewerProps {
   fileName: string;
   filePath: string;
@@ -27,109 +33,7 @@ interface CodeViewerProps {
   onClose?: () => void;
 }
 
-const getLanguageFromExtension = (fileName: string): string => {
-  const extension = fileName.split(".").pop()?.toLowerCase();
-
-  switch (extension) {
-    case "ts":
-    case "tsx":
-      return "typescript";
-    case "js":
-    case "jsx":
-      return "javascript";
-    case "py":
-      return "python";
-    case "java":
-      return "java";
-    case "cpp":
-    case "cc":
-    case "cxx":
-      return "cpp";
-    case "c":
-      return "c";
-    case "cs":
-      return "csharp";
-    case "php":
-      return "php";
-    case "rb":
-      return "ruby";
-    case "go":
-      return "go";
-    case "rs":
-      return "rust";
-    case "swift":
-      return "swift";
-    case "kt":
-      return "kotlin";
-    case "json":
-      return "json";
-    case "xml":
-      return "xml";
-    case "yaml":
-    case "yml":
-      return "yaml";
-    case "toml":
-      return "toml";
-    case "ini":
-      return "ini";
-    case "md":
-      return "markdown";
-    case "html":
-      return "html";
-    case "css":
-      return "css";
-    case "scss":
-    case "sass":
-      return "scss";
-    case "sql":
-      return "sql";
-    case "sh":
-    case "bash":
-      return "bash";
-    case "txt":
-    case "log":
-      return "text";
-    default:
-      return "text";
-  }
-};
-
-const getFileIcon = (fileName: string) => {
-  const extension = fileName.split(".").pop()?.toLowerCase();
-
-  switch (extension) {
-    case "ts":
-    case "tsx":
-    case "js":
-    case "jsx":
-    case "py":
-    case "java":
-    case "cpp":
-    case "c":
-    case "cs":
-    case "php":
-    case "rb":
-    case "go":
-    case "rs":
-    case "swift":
-    case "kt":
-      return <Code className="h-4 w-4 text-blue-500" />;
-    case "json":
-    case "xml":
-    case "yaml":
-    case "yml":
-    case "toml":
-    case "ini":
-      return <Code className="h-4 w-4 text-green-500" />;
-    case "md":
-    case "txt":
-    case "log":
-      return <FileText className="h-4 w-4 text-gray-500" />;
-    default:
-      return <FileText className="h-4 w-4 text-gray-400" />;
-  }
-};
-
+// CodeViewer component
 export const CodeViewer: React.FC<CodeViewerProps> = ({
   fileName,
   filePath,
@@ -141,7 +45,7 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
   const [showLineNumbers, setShowLineNumbers] = useState(true);
   const [wordWrap, setWordWrap] = useState(false);
 
-  const detectedLanguage = language || getLanguageFromExtension(fileName);
+  const detectedLanguage = language || getFileFromExtension(fileName);
   const lines = content.split("\n");
   const totalLines = lines.length;
 
@@ -174,17 +78,16 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
     <div className="flex flex-col h-full bg-background border rounded-lg overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between p-3 border-b bg-muted/50">
-        <div className="space-y-1">
+        <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            {getFileIcon(fileName)}
+            <FileIcon fileName={fileName} />
             <h3 className="font-medium text-sm">{fileName}</h3>
           </div>
-          <p className="text-xs text-muted-foreground">{filePath}</p>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-1">
           {/* Search */}
-          <div className="relative">
+          <div className="relative max-md:hidden">
             <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-muted-foreground" />
             <Input
               placeholder="Search in file..."
@@ -192,7 +95,7 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setSearchTerm(e.target.value)
               }
-              className="pl-8 h-8 w-48 text-xs"
+              className="pl-8 h-8 w-48 text-sm hidden sm:block"
             />
           </div>
 
@@ -228,8 +131,14 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
           </DropdownMenu>
 
           {onClose && (
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              ×
+            <Button
+              variant="outline"
+              size="sm"
+              className="size-7 cursor-pointer hover:text-destructive!"
+              onClick={onClose}
+              title="Close current selected file"
+            >
+              <XIcon className="size-4" />
             </Button>
           )}
         </div>
@@ -237,9 +146,7 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
 
       {/* Language Badge */}
       <div className="px-3 py-1 bg-muted/30 border-b">
-        <span className="text-xs text-muted-foreground">
-          {detectedLanguage.toUpperCase()} • {totalLines} lines
-        </span>
+        <span className="text-xs text-muted-foreground">{filePath}</span>
       </div>
 
       {/* Code Content */}
@@ -253,24 +160,44 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
               }`}
             >
               {showLineNumbers && (
-                <div className="flex-shrink-0 w-12 text-right text-muted-foreground select-none border-r pr-2">
+                <pre className="flex-shrink-0 w-12 text-right text-muted-foreground select-none border-r pr-2">
                   {index + 1}
-                </div>
+                </pre>
               )}
-              <div className="flex-1 px-2 py-0.5">{line || "\u00A0"}</div>
+              <pre className="flex-1 px-2 py-0.5">{line || "\u00A0"}</pre>
             </div>
           ))}
         </div>
       </div>
 
       {/* Footer */}
-      <div className="px-3 py-1 bg-muted/30 border-t text-xs text-muted-foreground">
-        {searchTerm && (
-          <span>
-            Found {filteredLines.length} of {totalLines} lines
-          </span>
-        )}
-        {!searchTerm && <span>Ready</span>}
+      <div className="px-3 py-1 bg-muted/30 border-t text-xs">
+        <div className="flex items-center gap-4 text-muted-foreground">
+          {searchTerm ? (
+            <div className="flex items-center gap-1">
+              <span>Found</span>
+              <span className="font-medium">{filteredLines.length}</span>
+              <span>of</span>
+              <span className="font-medium">{totalLines}</span>
+              <span>lines</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span className="size-2 bg-green-500 block rounded-full animate-pulse" />
+              <span>Ready</span>
+            </div>
+          )}
+
+          {/* Separator */}
+          <div className="h-4 w-[1px] bg-primary/50" />
+
+          {/* File Type */}
+          <div className="flex items-center gap-1.5">
+            <span>{detectedLanguage.toUpperCase()}</span>
+            <span>•</span>
+            <span>{totalLines} lines</span>
+          </div>
+        </div>
       </div>
     </div>
   );
