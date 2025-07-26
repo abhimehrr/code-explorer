@@ -22,58 +22,13 @@ import {
 import { FileNode } from "@/types/file.type";
 import { cn } from "@/lib/utils";
 import { truncateString } from "@/lib/utils/helper";
+import { FileIcon } from "./file-icon";
 
 // File Tree Props Type
 export interface FileExplorerProps {
-  data: FileNode[];
   onFileSelect?: (file: FileNode) => void;
   onFolderToggle?: (folder: FileNode) => void;
 }
-
-const getFileIcon = (fileName: string) => {
-  const extension = fileName.split(".").pop()?.toLowerCase();
-
-  switch (extension) {
-    case "ts":
-    case "tsx":
-    case "js":
-    case "jsx":
-    case "py":
-    case "java":
-    case "cpp":
-    case "c":
-    case "cs":
-    case "php":
-    case "rb":
-    case "go":
-    case "rs":
-    case "swift":
-    case "kt":
-      return <FileCode className="h-4 w-4 text-blue-500" />;
-    case "json":
-    case "xml":
-    case "yaml":
-    case "yml":
-    case "toml":
-    case "ini":
-      return <FileCode className="h-4 w-4 text-green-500" />;
-    case "md":
-    case "txt":
-    case "log":
-      return <FileText className="h-4 w-4 text-gray-500" />;
-    case "png":
-    case "jpg":
-    case "jpeg":
-    case "gif":
-    case "svg":
-    case "ico":
-      return <FileImage className="h-4 w-4 text-purple-500" />;
-    case "pdf":
-      return <FileText className="h-4 w-4 text-red-500" />;
-    default:
-      return <File className="h-4 w-4 text-gray-400" />;
-  }
-};
 
 export const NodeItem: React.FC<{
   node: FileNode;
@@ -122,12 +77,13 @@ export const NodeItem: React.FC<{
               <Folder className="size-4 text-yellow-500" />
             )
           ) : (
-            getFileIcon(node.name)
+            <FileIcon fileName={"node.name.ts"} />
           )}
 
           {/* File Name */}
           <span className="text-sm truncate flex-1">
-            {truncateString(node.name)}
+            {/* {truncateString(node.name)} */}
+            {node.name}
           </span>
         </div>
       </div>

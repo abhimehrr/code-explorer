@@ -125,7 +125,7 @@ export const getFileFromExtension = (fileName: string): string => {
  */
 export const FileIcon = ({
   fileName,
-  className
+  className,
 }: {
   fileName: string;
   className?: string;
@@ -137,8 +137,6 @@ export const FileIcon = ({
   const config =
     FILE_ICON_MAP.find((icon) => icon.extensions.includes(extension)) ||
     FILE_ICON_MAP[0];
-
-  console.log(extension, config);
 
   // Return the file icon
   return <config.icon className={cn("size-4", config.class, className)} />;
