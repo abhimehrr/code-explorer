@@ -1,17 +1,15 @@
 "use client";
 
-import React, { Fragment, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Search,
   Copy,
   Download,
-  Share2,
   Settings,
-  FileText,
-  Code,
   XIcon,
+  AlertCircle,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -23,35 +21,49 @@ import {
   getFileFromExtension,
   FileIcon,
 } from "@/components/file-explorer/file-icon";
-
-// Interface for the CodeViewer component
-interface CodeViewerProps {
-  fileName: string;
-  filePath: string;
-  content: string;
-  language?: string;
-  onClose?: () => void;
-}
+import Link from "next/link";
+import { useFilesStore } from "@/stores/files.store";
+import { axios } from "@/lib/api/api";
+import { useQuery } from "@tanstack/react-query";
+import { HOST } from "./explorer";
+import { FileContent } from "@/types/file.type";
+import { BlockLoader } from "@/components/loaders";
+import { errorMessage } from "@/lib/utils/helper";
+import { cn } from "@/lib/utils";
 
 // CodeViewer component
-export const CodeViewer: React.FC<CodeViewerProps> = ({
-  fileName,
-  filePath,
-  content,
-  language,
-  onClose,
-}) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showLineNumbers, setShowLineNumbers] = useState(true);
-  const [wordWrap, setWordWrap] = useState(false);
+export const CodeViewer: React.FC = () => {
+  // File Store
+  const { selectedFile, setSelectedFile } = useFilesStore();
 
-  const detectedLanguage = language || getFileFromExtension(fileName);
-  const lines = content.split("\n");
+  // File State
+  const [file, setFile] = useState<FileContent | null>(null);
+  const [settings, setSettings] = useState({
+    searchTerm: "",
+    showLineNumbers: true,
+    wordWrap: false,
+  });
+
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Get File Content
+  const { data, isLoading, isError, error, isFetching, refetch } = useQuery({
+    queryFn: () =>
+      axios({
+        url: `${HOST}/files/?file_path=${selectedFile?.path}`,
+      }),
+    queryKey: ["files", selectedFile?.path],
+    enabled: !!selectedFile?.path,
+  });
+
+  // File Details
+  const detectedLanguage = getFileFromExtension(file?.ext || "");
+  const lines = file?.content?.split("\n") || [];
   const totalLines = lines.length;
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(content);
+      await navigator.clipboard.writeText(file?.content || "");
       // You could add a toast notification here
     } catch (err) {
       console.error("Failed to copy: ", err);
@@ -59,59 +71,90 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
   };
 
   const handleDownload = () => {
-    const blob = new Blob([content], { type: "text/plain" });
+    const blob = new Blob([file?.content || ""], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = fileName;
+    a.download = file?.name || "";
     a.click();
     URL.revokeObjectURL(url);
   };
 
-  const filteredLines = searchTerm
+  const filteredLines = settings.searchTerm
     ? lines.filter((line, index) =>
-        line.toLowerCase().includes(searchTerm.toLowerCase())
+        line.toLowerCase().includes(settings.searchTerm.toLowerCase())
       )
     : lines;
 
+  // Keydown for Search (Ctrl+K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === "k") {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // File content
+  useEffect(() => {
+    if (data) {
+      setFile(data);
+    }
+  }, [data]);
+
   return (
-    <div className="flex flex-col h-full bg-background border rounded-lg overflow-hidden">
+    <div className="flex flex-col h-full w-full bg-background border rounded-lg overflow-hiddens">
       {/* Header */}
       <div className="flex items-center justify-between p-3 border-b bg-muted/50">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <FileIcon fileName={fileName} />
-            <h3 className="font-medium text-sm">{fileName}</h3>
+            <FileIcon fileName={file?.name || ""} className="size-5" />
+            <h3 className="font-medium">{file?.name || ""}</h3>
           </div>
         </div>
 
         <div className="flex items-center gap-1">
           {/* Search */}
-          <div className="relative max-md:hidden">
-            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-muted-foreground" />
-            <Input
-              placeholder="Search in file..."
-              value={searchTerm}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setSearchTerm(e.target.value)
-              }
-              className="pl-8 h-8 w-48 text-sm hidden sm:block"
-            />
+          <div className="w-full flex items-center justify-between gap-2 max-md:hidden">
+            <Button
+              variant={"outline"}
+              className="w-full flex items-center justify-between gap-2 py-0!"
+            >
+              <Search className="size-4 text-muted-foreground" />
+              <input
+                placeholder="Search in File..."
+                value={settings.searchTerm}
+                ref={inputRef}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    searchTerm: e.target.value,
+                  }))
+                }
+                className="h-full px-2 w-36 md:w-48 lg:w-64 border-x focus:outline-none"
+              />
+              <div className="absoluteright-2 top-1/2 transform-translate-y-1/2">
+                <span className="text-xs font-semibold text-muted-foreground">
+                  Ctrl + K
+                </span>
+              </div>
+            </Button>
           </div>
 
-          {/* Actions */}
+          {/* Copy to clipboard */}
           <Button variant="ghost" size="sm" onClick={handleCopy}>
             <Copy className="h-4 w-4" />
           </Button>
 
+          {/* Download */}
           <Button variant="ghost" size="sm" onClick={handleDownload}>
             <Download className="h-4 w-4" />
           </Button>
 
-          <Button variant="ghost" size="sm">
-            <Share2 className="h-4 w-4" />
-          </Button>
-
+          {/* Settings */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm">
@@ -120,22 +163,34 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem
-                onClick={() => setShowLineNumbers(!showLineNumbers)}
+                onClick={() =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    showLineNumbers: !prev.showLineNumbers,
+                  }))
+                }
               >
-                {showLineNumbers ? "Hide" : "Show"} line numbers
+                {settings.showLineNumbers ? "Hide" : "Show"} Line Numbers
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setWordWrap(!wordWrap)}>
-                {wordWrap ? "Disable" : "Enable"} word wrap
+              <DropdownMenuItem
+                onClick={() =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    wordWrap: !prev.wordWrap,
+                  }))
+                }
+              >
+                {settings.wordWrap ? "Disable" : "Enable"} Word Wrap
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {onClose && (
+          {selectedFile && (
             <Button
               variant="outline"
               size="sm"
               className="size-7 cursor-pointer hover:text-destructive!"
-              onClick={onClose}
+              onClick={() => setSelectedFile(null)}
               title="Close current selected file"
             >
               <XIcon className="size-4" />
@@ -146,34 +201,54 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
 
       {/* Language Badge */}
       <div className="px-3 py-1 bg-muted/30 border-b">
-        <span className="text-xs text-muted-foreground">{filePath}</span>
+        <span className="text-xs text-muted-foreground">
+          {file?.path || ""}
+        </span>
       </div>
 
       {/* Code Content */}
       <div className="flex-1 overflow-auto">
-        <div className="font-mono text-sm">
-          {filteredLines.map((line, index) => (
+        {isLoading ? (
+          <BlockLoader
+            loader={{
+              show: true,
+              text: "Getting File Content...",
+            }}
+            classNames={{
+              container: "flex items-center justify-center h-full",
+            }}
+          />
+        ) : isError ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="size-5 text-destructive" />
+              <p className="text-destructive">{errorMessage(error)}</p>
+            </div>
+          </div>
+        ) : (
+          filteredLines.map((line, index) => (
             <div
               key={index}
-              className={`flex hover:bg-muted/50 ${
-                wordWrap ? "whitespace-pre-wrap" : "whitespace-pre"
-              }`}
+              className={cn(
+                "flex hover:bg-muted/50",
+                settings.wordWrap ? "whitespace-pre-wrap" : "whitespace-pre"
+              )}
             >
-              {showLineNumbers && (
+              {settings.showLineNumbers && (
                 <pre className="flex-shrink-0 w-12 text-right text-muted-foreground select-none border-r pr-2">
                   {index + 1}
                 </pre>
               )}
               <pre className="flex-1 px-2 py-0.5">{line || "\u00A0"}</pre>
             </div>
-          ))}
-        </div>
+          ))
+        )}
       </div>
 
       {/* Footer */}
       <div className="px-3 py-1 bg-muted/30 border-t text-xs">
         <div className="flex items-center gap-4 text-muted-foreground">
-          {searchTerm ? (
+          {settings.searchTerm ? (
             <div className="flex items-center gap-1">
               <span>Found</span>
               <span className="font-medium">{filteredLines.length}</span>

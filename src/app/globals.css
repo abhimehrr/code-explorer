@@ -26,25 +26,25 @@
   @apply size-[3px];
 }
 .thin-scrollbar::-webkit-scrollbar-track {
-  @apply bg-transparent;
+  @apply bg-background;
 }
 .thin-scrollbar::-webkit-scrollbar-thumb {
-  @apply bg-gray-600 rounded-full;
+  @apply bg-primary rounded-full;
 }
 
 ::-webkit-scrollbar {
   @apply size-1;
 }
 ::-webkit-scrollbar-track {
-  @apply bg-gray-200;
+  @apply bg-background;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-foreground rounded-full;
+  @apply bg-primary rounded-full;
 }
 
 ::-webkit-scrollbar-button {
-  @apply bg-gray-100 size-0;
+  @apply bg-primary size-0;
 }
 
 @theme inline {

@@ -1,43 +1,31 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  ChevronRight,
-  ChevronDown,
-  Folder,
-  FolderOpen,
-  FileText,
-  FileCode,
-  FileImage,
-  File,
-  MoreHorizontal,
-} from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { FileNode } from "@/types/file.type";
+import { ChevronRight, Folder, FolderOpen } from "lucide-react";
+import { File } from "@/types/file.type";
 import { cn } from "@/lib/utils";
-import { truncateString } from "@/lib/utils/helper";
 import { FileIcon } from "./file-icon";
+import { truncateString } from "@/lib/utils/helper";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 // File Tree Props Type
 export interface FileExplorerProps {
-  onFileSelect?: (file: FileNode) => void;
-  onFolderToggle?: (folder: FileNode) => void;
+  node: File;
+  level: number;
+  onFileSelect?: (file: File) => void;
+  onFolderToggle?: (folder: File) => void;
 }
 
-export const NodeItem: React.FC<{
-  node: FileNode;
-  level: number;
-  onFileSelect?: (file: FileNode) => void;
-  onFolderToggle?: (folder: FileNode) => void;
-}> = ({ node, level, onFileSelect, onFolderToggle }) => {
+// Node Item Component
+export const NodeItem = ({
+  node,
+  level,
+  onFileSelect,
+  onFolderToggle,
+}: FileExplorerProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
+  // Handle Toggle
   const handleToggle = () => {
     if (node.type === "folder") {
       setIsExpanded(!isExpanded);
@@ -81,10 +69,14 @@ export const NodeItem: React.FC<{
           )}
 
           {/* File Name */}
-          <span className="text-sm truncate flex-1">
-            {/* {truncateString(node.name)} */}
-            {node.name}
-          </span>
+          <Tooltip>
+            <TooltipTrigger className="cursor-pointer max-w-full truncate">
+              {node.name}
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="font-semibold">{node.path}</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
       </div>
 
