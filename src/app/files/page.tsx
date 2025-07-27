@@ -4,6 +4,7 @@ import { CodeViewer } from "@/app/files/_comp/code-viewer";
 import { FileExplorer } from "./_comp/explorer";
 import { useFilesStore } from "@/stores/files.store";
 import { ContentNotFound } from "@/components/file-explorer/content-not-found";
+import Configuration from "./_comp/sticky-configuration";
 
 export default function FilesPage() {
   // File Store
@@ -21,6 +22,9 @@ export default function FilesPage() {
           {selectedFile ? <CodeViewer /> : <ContentNotFound />}
         </div>
       </div>
+
+      {/* Sticky Configuration */}
+      <Configuration />
     </div>
   );
 }

@@ -38,7 +38,7 @@ export default function RootLayout({
               <Toaster />
 
               {/* React Query Devtools */}
-              <ReactQueryDevtools initialIsOpen={false} />
+              {false && <ReactQueryDevtools initialIsOpen={false} />}
             </QueryProvider>
           </div>
         </ThemeProvider>
