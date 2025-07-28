@@ -12,9 +12,11 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
-import { FolderOpen, Cloud } from "lucide-react";
+import { FolderOpen, Cloud, Github } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import Image from "next/image";
+import { useTheme } from "next-themes";
+import { cn } from "@/lib/utils";
 
 // Navigation Items
 const navigationItems = [
@@ -34,6 +36,8 @@ const navigationItems = [
 
 // Navbar
 export function Navbar() {
+  const { theme } = useTheme();
+
   return (
     <nav className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -96,13 +100,7 @@ export function Navbar() {
               asChild
             >
               <Link href="https://github.com/code-explorer" target="_blank">
-                <Image
-                  src={"/github-mark-white.png"}
-                  alt="Github"
-                  width={20}
-                  height={20}
-                  className="size-4"
-                />
+                <Github className="size-4" />
               </Link>
             </Button>
 

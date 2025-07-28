@@ -1,7 +1,9 @@
-import axs, { AxiosInstance } from "axios";
+import axios from "axios";
+import { ls } from "../utils/ls";
+import { HostConfiguration, PathEnum } from "@/validation/configuration.zod";
 
 // API Client
-const api = axs.create({
+const api = axios.create({
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -15,23 +17,45 @@ export interface Token {
 }
 
 interface AxiosConfig {
-  url: string;
+  filePath?: string;
   data?: any;
-  token?: Token;
   method?: "get" | "post" | "put" | "delete" | "patch";
   params?: Record<string, string | number | boolean>;
 }
 
 // Axios Client Instance
-export const axios = async (config: AxiosConfig) => {
-  const { token, params, method = "get", url, data } = config;
+export const getFile = async (config: AxiosConfig) => {
+  // Get token from Local Storage
+  const host: HostConfiguration = ls
+    .get("hosts")
+    ?.find((h: HostConfiguration) => h.default);
+
+  // Set base URL
+  if (!host) {
+    throw new Error("No Host, Please add a host in the configuration");
+  }
+
+  // File Path
+  if (!host.paths?.find((p) => p.key === PathEnum.FILES)) {
+    throw new Error("File path not found in host configuration");
+  }
+
+  api.defaults.baseURL = host.baseUrl;
 
   // Set token if provided
-  if (token) {
+  if (host?.token) {
+    // Set token
     api.interceptors.request.use((config) => {
-      config.headers.Authorization = `${token.type} ${token.value}`;
+      config.headers.Authorization = `Bearer ${host.token}`;
       return config;
     });
   }
-  return (await api[method](url, { params, data })).data;
+
+  // Make request
+  return (
+    await api[config.method || "get"](`${PathEnum.FILES}`, {
+      params: config?.params,
+      data: config?.data,
+    })
+  ).data;
 };

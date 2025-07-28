@@ -23,13 +23,13 @@ import {
 } from "@/components/file-explorer/file-icon";
 import Link from "next/link";
 import { useFilesStore } from "@/stores/files.store";
-import { axios } from "@/lib/api/api";
+import { getFile } from "@/lib/api/api";
 import { useQuery } from "@tanstack/react-query";
-import { HOST } from "./explorer";
 import { FileContent } from "@/types/file.type";
 import { BlockLoader } from "@/components/loaders";
 import { errorMessage } from "@/lib/utils/helper";
 import { cn } from "@/lib/utils";
+import { ls } from "@/lib/utils/ls";
 
 // CodeViewer component
 export const CodeViewer: React.FC = () => {
@@ -49,8 +49,8 @@ export const CodeViewer: React.FC = () => {
   // Get File Content
   const { data, isLoading, isError, error, isFetching, refetch } = useQuery({
     queryFn: () =>
-      axios({
-        url: `${HOST}/files/?file_path=${selectedFile?.path}`,
+      getFile({
+        filePath: selectedFile?.path,
       }),
     queryKey: ["files", selectedFile?.path],
     enabled: !!selectedFile?.path,
@@ -219,10 +219,17 @@ export const CodeViewer: React.FC = () => {
             }}
           />
         ) : isError ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="size-5 text-destructive" />
-              <p className="text-destructive">{errorMessage(error)}</p>
+          <div className="p-4 space-y-4">
+            <p className="text-sm text-destructive">{errorMessage(error)}</p>
+            <div className="space-y-5">
+              <h3 className="text-sm font-medium">Host Configuration</h3>
+              <pre>
+                {JSON.stringify(
+                  ls.get("hosts").find((h: any) => h.default),
+                  null,
+                  2
+                )}
+              </pre>
             </div>
           </div>
         ) : (

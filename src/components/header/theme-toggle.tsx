@@ -17,11 +17,7 @@ export function ThemeToggle() {
   return (
     <HoverCard openDelay={100} closeDelay={200}>
       <HoverCardTrigger asChild>
-        <Button
-          variant="outline"
-          size="icon"
-          className="size-8 cursor-pointer"
-        >
+        <Button variant="outline" size="icon" className="size-8 cursor-pointer">
           <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
           <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
           <span className="sr-only">Toggle theme</span>
@@ -37,7 +33,7 @@ export function ThemeToggle() {
             <Sun className="size-4" />
             <span className="text-sm font-medium">Light</span>
           </Button>
-          <Button 
+          <Button
             variant="ghost"
             className="w-full flex items-center justify-start gap-2"
             onClick={() => setTheme("dark")}

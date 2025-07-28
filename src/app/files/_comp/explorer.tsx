@@ -5,13 +5,15 @@ import { ThemeToggle } from "@/components/header/theme-toggle";
 import { InlineLoader } from "@/components/loaders";
 import RefreshButton from "@/components/refresh-button";
 import { Button } from "@/components/ui/button";
-import { axios } from "@/lib/api/api";
+import { getFile } from "@/lib/api/api";
+import { errorMessage } from "@/lib/utils/helper";
+import { ls } from "@/lib/utils/ls";
 import { useFilesStore } from "@/stores/files.store";
 import { File } from "@/types/file.type";
+import { HostConfiguration } from "@/validation/configuration.zod";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRight, GitBranch, MoveLeft, RefreshCcw } from "lucide-react";
 import Link from "next/link";
-export const HOST = "http://localhost:2000";
 
 // File Tree Component
 export const FileExplorer: React.FC = () => {
@@ -20,12 +22,9 @@ export const FileExplorer: React.FC = () => {
 
   // Get Files
   const { data, isLoading, isError, error, isFetching, refetch } = useQuery({
-    queryFn: () => axios({ url: `${HOST}/files` }),
+    queryFn: () => getFile({}),
     queryKey: ["files"],
   });
-
-  if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div>Error: {error.message}</div>;
 
   return (
     <div className="w-80 border-r bg-muted/30">
@@ -62,16 +61,43 @@ export const FileExplorer: React.FC = () => {
 
       <div className="h-full">
         <div className="w-full h-[calc(100vh-90px)] overflow-auto thin-scrollbar">
-          <div className="p-2">
-            {data.map((dir: File) => (
-              <NodeItem
-                key={dir.id}
-                node={dir}
-                level={0}
-                onFileSelect={setSelectedFile}
-              />
-            ))}
-          </div>
+          {isLoading ? (
+            <InlineLoader
+              loader={{
+                show: true,
+                text: "Getting Files...",
+              }}
+              classNames={{
+                container: "h-full",
+                loader: "size-5",
+              }}
+            />
+          ) : isError ? (
+            <div className="p-4 space-y-4">
+              <p className="text-sm text-destructive">{errorMessage(error)}</p>
+              <div className="space-y-5">
+                <h3 className="text-sm font-medium">Host Configuration</h3>
+                <pre>
+                  {JSON.stringify(
+                    ls.get("hosts").find((h: any) => h.default),
+                    null,
+                    2
+                  )}
+                </pre>
+              </div>
+            </div>
+          ) : (
+            <div className="p-2">
+              {data.map((dir: File) => (
+                <NodeItem
+                  key={dir.id}
+                  node={dir}
+                  level={0}
+                  onFileSelect={setSelectedFile}
+                />
+              ))}
+            </div>
+          )}
         </div>
         <div className="border-t pt-2 text-center text-sm text-muted-foreground">
           <Link
