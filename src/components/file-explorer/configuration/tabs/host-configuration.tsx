@@ -24,15 +24,17 @@ import { successToast, zodError } from "@/components/form-error";
 import { InlineLoader } from "@/components/loaders";
 import { ls } from "@/lib/utils/ls";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useFilesStore } from "@/stores/files.store";
 
 // Host Configuration Component
 export const HostConfiguration = ({
   host,
-  setHosts,
 }: {
   host: HostConfigurationType;
-  setHosts: (hosts: HostConfigurationType[]) => void;
 }) => {
+  // Store
+  const { setHost, deleteHost } = useFilesStore();
+
   // Form
   const form = useForm({
     resolver: zodResolver(hostConfigurationSchema),
@@ -55,7 +57,7 @@ export const HostConfiguration = ({
         (h: HostConfigurationType) => h.id !== host.id
       );
       ls.set("hosts", lhost);
-      setHosts(lhost);
+      // setHosts(lhost);
       reset();
     }
   };
@@ -88,7 +90,7 @@ export const HostConfiguration = ({
 
     // Save to Local Storage
     ls.set("hosts", hosts);
-    setHosts(hosts);
+    // setHosts(hosts);
 
     // Toast
     successToast("Host saved successfully");
@@ -109,7 +111,7 @@ export const HostConfiguration = ({
   return (
     <Form {...form}>
       <form
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleSubmit(setHost)}
         className="border even:bg-accent rounded-lg"
       >
         <div className="px-6 py-2 flex items-center justify-between">
@@ -247,7 +249,11 @@ export const HostConfiguration = ({
 
           {/* Save Button */}
           <div className="col-span-full flex justify-end items-center gap-4">
-            <Button type="button" variant="outline" onClick={handleDeleteHost}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => deleteHost(host.id)}
+            >
               <Trash2 className="size-3" />
               <span>Delete</span>
             </Button>

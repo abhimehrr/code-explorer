@@ -14,10 +14,8 @@ import {
 import { getFile } from "@/lib/api/api";
 import { cn } from "@/lib/utils";
 import { errorMessage } from "@/lib/utils/helper";
-import { ls } from "@/lib/utils/ls";
 import { useFilesStore } from "@/stores/files.store";
 import { File } from "@/types/file.type";
-import { HostConfiguration } from "@/validation/configuration.zod";
 import { useQuery } from "@tanstack/react-query";
 import {
   AlertTriangle,
@@ -30,13 +28,11 @@ import {
   Settings2,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 
 // File Tree Component
 export const FileExplorer: React.FC = () => {
   // File Store
-  const { setSelectedFile } = useFilesStore();
-  const [hosts, setHosts] = useState<HostConfiguration[]>([]);
+  const { setSelectedFile, hosts, updateHost } = useFilesStore();
 
   // Get Files
   const { data, isLoading, isError, error, isFetching, refetch } = useQuery({
@@ -46,24 +42,13 @@ export const FileExplorer: React.FC = () => {
 
   // Handle Host Change
   const handleHostChange = (value: string) => {
-    const updatedHosts = hosts?.map((host) => {
-      if (host.id === value) {
-        host.default = true;
-      } else {
-        host.default = false;
-      }
-      return host;
-    });
+    const host = hosts?.find((h) => h.id === value);
 
     // Update Hosts
-    ls.set("hosts", updatedHosts);
-    setHosts(updatedHosts);
+    if (host) {
+      updateHost(value, { ...host, default: true });
+    }
   };
-
-  // Get Hosts
-  useEffect(() => {
-    setHosts(ls.get("hosts") || []);
-  }, []);
 
   return (
     <div className="w-80 border-r bg-muted/30">
@@ -128,11 +113,19 @@ export const FileExplorer: React.FC = () => {
                 <SelectValue placeholder="Select Host" />
               </SelectTrigger>
               <SelectContent>
-                {hosts?.map((host) => (
-                  <SelectItem key={host.id} value={host.id}>
-                    {host.name}
-                  </SelectItem>
-                ))}
+                {hosts.map((host) =>
+                  host.baseUrl.length > 0 ? (
+                    <SelectItem key={host.id} value={host.id}>
+                      {host.name}
+                    </SelectItem>
+                  ) : (
+                    <SelectItem key={host.id} value={host.id} disabled>
+                      <span className="text-muted-foreground">
+                        {host.name} - (Not Configured)
+                      </span>
+                    </SelectItem>
+                  )
+                )}
               </SelectContent>
             </Select>
           )}

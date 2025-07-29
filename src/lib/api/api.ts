@@ -30,24 +30,26 @@ export const getFile = async (config: AxiosConfig) => {
     ?.find((h: HostConfiguration) => h.default);
 
   // Set base URL
-  if (!host) {
+  if (!host || host.baseUrl.length < 1) {
     throw new Error("No Host, Please add a host in the configuration");
   }
 
+  const { baseUrl, paths, token } = host;
+
   // File Path
-  const filePaths = host.paths?.find((p) => p.key === PathEnum.FILES);
-  if (!filePaths) {
+  const filePaths = paths?.find((p) => p.key === PathEnum.FILES);
+  if (!filePaths || filePaths.path.length < 1) {
     throw new Error("File path not found in host configuration");
   }
 
   // Set Base URL
-  api.defaults.baseURL = host.baseUrl;
+  api.defaults.baseURL = baseUrl;
 
   // Set token if provided
-  if (host?.token) {
+  if (token) {
     // Set token
     api.interceptors.request.use((config) => {
-      config.headers.Authorization = `Bearer ${host.token}`;
+      config.headers.Authorization = `Bearer ${token}`;
       return config;
     });
   }

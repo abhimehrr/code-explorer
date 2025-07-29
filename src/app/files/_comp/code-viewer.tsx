@@ -36,7 +36,7 @@ import { ls } from "@/lib/utils/ls";
 // CodeViewer component
 export const CodeViewer: React.FC = () => {
   // File Store
-  const { selectedFile, setSelectedFile } = useFilesStore();
+  const { selectedFile, setSelectedFile, hosts } = useFilesStore();
 
   // File State
   const [file, setFile] = useState<FileContent | null>(null);
@@ -286,7 +286,7 @@ export const CodeViewer: React.FC = () => {
             {/* Host Configuration */}
             <div className="flex-1 border-y overflow-auto">
               <pre className="p-4 text-xs">
-                {JSON.stringify(ls.get("hosts"), null, 2)}
+                {JSON.stringify(hosts, null, 2)}
               </pre>
             </div>
           </div>
