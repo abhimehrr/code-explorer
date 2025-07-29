@@ -25,6 +25,7 @@ const Configuration = () => {
           <Button
             size={"sm"}
             variant={"outline"}
+            id="configuration-button"
             onClick={() => setIsOpen((prev) => !prev)}
             className="px-4 py-5 bg-accent! group rounded-full cursor-pointer"
           >
@@ -35,7 +36,7 @@ const Configuration = () => {
                 <div className="absolute -top-1 -right-1 size-2 bg-yellow-500 rounded-full animate-caret-blink"></div>
               </div>
               <span className="font-semibold tracking-wide text-sm">
-                Settings
+                Config
               </span>
             </div>
           </Button>

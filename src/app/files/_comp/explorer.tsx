@@ -3,9 +3,16 @@
 import { NodeItem } from "@/components/file-explorer/node-item";
 import { ThemeToggle } from "@/components/header/theme-toggle";
 import { InlineLoader } from "@/components/loaders";
-import RefreshButton from "@/components/refresh-button";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { getFile } from "@/lib/api/api";
+import { cn } from "@/lib/utils";
 import { errorMessage } from "@/lib/utils/helper";
 import { ls } from "@/lib/utils/ls";
 import { useFilesStore } from "@/stores/files.store";
@@ -15,23 +22,48 @@ import { useQuery } from "@tanstack/react-query";
 import {
   AlertTriangle,
   ArrowUpRight,
+  Copyright,
   GitBranch,
   MoveLeft,
+  Plus,
   RefreshCcw,
   Settings2,
 } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 // File Tree Component
 export const FileExplorer: React.FC = () => {
   // File Store
   const { setSelectedFile } = useFilesStore();
+  const [hosts, setHosts] = useState<HostConfiguration[]>([]);
 
   // Get Files
   const { data, isLoading, isError, error, isFetching, refetch } = useQuery({
     queryFn: () => getFile({}),
     queryKey: ["files"],
   });
+
+  // Handle Host Change
+  const handleHostChange = (value: string) => {
+    const updatedHosts = hosts?.map((host) => {
+      if (host.id === value) {
+        host.default = true;
+      } else {
+        host.default = false;
+      }
+      return host;
+    });
+
+    // Update Hosts
+    ls.set("hosts", updatedHosts);
+    setHosts(updatedHosts);
+  };
+
+  // Get Hosts
+  useEffect(() => {
+    setHosts(ls.get("hosts") || []);
+  }, []);
 
   return (
     <div className="w-80 border-r bg-muted/30">
@@ -60,13 +92,75 @@ export const FileExplorer: React.FC = () => {
             <ThemeToggle />
 
             {/* Refresh Button */}
-            <RefreshButton onClick={() => refetch()} isLoading={isFetching} />
+            {/* <RefreshButton onClick={() => refetch()} isLoading={isFetching} /> */}
           </div>
         </div>
       </div>
       {/* File Explorer */}
 
       <div className="h-full">
+        {/* Select Default Host */}
+        <div
+          className={cn(
+            "w-full flex items-center justify-between gap-2 pt-2 px-4",
+            isError && "pb-2"
+          )}
+        >
+          {/* If no hosts, Add new */}
+          {hosts?.length === 0 ? (
+            <Button
+              variant="outline"
+              onClick={() => {
+                // Open Add Host Dialog
+                document.getElementById("configuration-button")?.click();
+              }}
+              className="w-1/2"
+            >
+              <Plus className="size-4" />
+              <span>Add New Host</span>
+            </Button>
+          ) : (
+            <Select
+              onValueChange={handleHostChange}
+              defaultValue={hosts?.find((h) => h.default)?.id}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select Host" />
+              </SelectTrigger>
+              <SelectContent>
+                {hosts?.map((host) => (
+                  <SelectItem key={host.id} value={host.id}>
+                    {host.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
+          {/* Refresh Button */}
+          <Button
+            variant="outline"
+            onClick={() => refetch()}
+            disabled={isFetching || isLoading}
+            className={cn(hosts?.length === 0 ? "w-1/2" : "")}
+          >
+            {isFetching || isLoading ? (
+              <InlineLoader
+                loader={{
+                  show: true,
+                  text: "Refetching...",
+                }}
+              />
+            ) : (
+              <>
+                <span>Refresh</span>
+                <RefreshCcw className="size-4" />
+              </>
+            )}
+          </Button>
+        </div>
+
+        {/* File Explorer Content */}
         <div className="w-full h-[calc(100vh-90px)] overflow-auto thin-scrollbar">
           {isLoading ? (
             <InlineLoader
@@ -101,7 +195,7 @@ export const FileExplorer: React.FC = () => {
               <div className="h-full overflow-auto">
                 <pre className="p-4 text-sm">
                   {JSON.stringify(
-                    ls.get("hosts")?.find((h: any) => h.default),
+                    hosts.find((h) => h.default),
                     null,
                     2
                   )}
@@ -127,6 +221,7 @@ export const FileExplorer: React.FC = () => {
             target="_blank"
             className="flex items-center justify-center gap-2 text-pink-500 hover:text-pink-600 tracking-wide transition-all"
           >
+            <Copyright className="size-3.5" />
             <span>Abhishek</span>
             <ArrowUpRight className="size-4" />
           </Link>

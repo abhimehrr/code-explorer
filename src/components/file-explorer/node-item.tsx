@@ -73,7 +73,7 @@ export const NodeItem = ({
             <TooltipTrigger className="cursor-pointer max-w-full truncate">
               {node.name}
             </TooltipTrigger>
-            <TooltipContent>
+            <TooltipContent className="mx-4">
               <p className="font-semibold">{node.path}</p>
             </TooltipContent>
           </Tooltip>

@@ -24,7 +24,6 @@ import {
   getFileFromExtension,
   FileIcon,
 } from "@/components/file-explorer/file-icon";
-import Link from "next/link";
 import { useFilesStore } from "@/stores/files.store";
 import { getFile } from "@/lib/api/api";
 import { useQuery } from "@tanstack/react-query";
@@ -33,7 +32,6 @@ import { BlockLoader, InlineLoader } from "@/components/loaders";
 import { errorMessage } from "@/lib/utils/helper";
 import { cn } from "@/lib/utils";
 import { ls } from "@/lib/utils/ls";
-import RefreshButton from "@/components/refresh-button";
 
 // CodeViewer component
 export const CodeViewer: React.FC = () => {
