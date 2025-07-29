@@ -12,7 +12,14 @@ import { useFilesStore } from "@/stores/files.store";
 import { File } from "@/types/file.type";
 import { HostConfiguration } from "@/validation/configuration.zod";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowUpRight, GitBranch, MoveLeft, RefreshCcw } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowUpRight,
+  GitBranch,
+  MoveLeft,
+  RefreshCcw,
+  Settings2,
+} from "lucide-react";
 import Link from "next/link";
 
 // File Tree Component
@@ -73,13 +80,28 @@ export const FileExplorer: React.FC = () => {
               }}
             />
           ) : isError ? (
-            <div className="p-4 space-y-4">
-              <p className="text-sm text-destructive">{errorMessage(error)}</p>
-              <div className="space-y-5">
-                <h3 className="text-sm font-medium">Host Configuration</h3>
-                <pre>
+            <div className="h-full flex flex-col">
+              {/* Error */}
+              <div className="bg-destructive/10 border-b border-destructive/20 px-4 py-3 flex items-center gap-2">
+                <AlertTriangle className="size-5 text-destructive" />
+                <h3 className="font-medium text-destructive">
+                  {errorMessage(error)}
+                </h3>
+              </div>
+
+              {/* Host Configuration Title */}
+              <div className="p-4 border-b">
+                <h4 className="font-medium flex items-center gap-2">
+                  <Settings2 className="size-5 text-muted-foreground" />
+                  <span>Host Configuration</span>
+                </h4>
+              </div>
+
+              {/* Host Configuration */}
+              <div className="h-full overflow-auto">
+                <pre className="p-4 text-sm">
                   {JSON.stringify(
-                    ls.get("hosts").find((h: any) => h.default),
+                    ls.get("hosts")?.find((h: any) => h.default),
                     null,
                     2
                   )}

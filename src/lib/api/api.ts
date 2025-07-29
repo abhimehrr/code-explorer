@@ -17,7 +17,6 @@ export interface Token {
 }
 
 interface AxiosConfig {
-  filePath?: string;
   data?: any;
   method?: "get" | "post" | "put" | "delete" | "patch";
   params?: Record<string, string | number | boolean>;
@@ -36,10 +35,12 @@ export const getFile = async (config: AxiosConfig) => {
   }
 
   // File Path
-  if (!host.paths?.find((p) => p.key === PathEnum.FILES)) {
+  const filePaths = host.paths?.find((p) => p.key === PathEnum.FILES);
+  if (!filePaths) {
     throw new Error("File path not found in host configuration");
   }
 
+  // Set Base URL
   api.defaults.baseURL = host.baseUrl;
 
   // Set token if provided
@@ -53,7 +54,7 @@ export const getFile = async (config: AxiosConfig) => {
 
   // Make request
   return (
-    await api[config.method || "get"](`${PathEnum.FILES}`, {
+    await api[config.method || "get"](`${filePaths.path}`, {
       params: config?.params,
       data: config?.data,
     })

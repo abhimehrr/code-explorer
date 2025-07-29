@@ -10,6 +10,9 @@ import {
   Settings,
   XIcon,
   AlertCircle,
+  AlertTriangle,
+  Settings2,
+  RefreshCcw,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -26,10 +29,11 @@ import { useFilesStore } from "@/stores/files.store";
 import { getFile } from "@/lib/api/api";
 import { useQuery } from "@tanstack/react-query";
 import { FileContent } from "@/types/file.type";
-import { BlockLoader } from "@/components/loaders";
+import { BlockLoader, InlineLoader } from "@/components/loaders";
 import { errorMessage } from "@/lib/utils/helper";
 import { cn } from "@/lib/utils";
 import { ls } from "@/lib/utils/ls";
+import RefreshButton from "@/components/refresh-button";
 
 // CodeViewer component
 export const CodeViewer: React.FC = () => {
@@ -50,7 +54,9 @@ export const CodeViewer: React.FC = () => {
   const { data, isLoading, isError, error, isFetching, refetch } = useQuery({
     queryFn: () =>
       getFile({
-        filePath: selectedFile?.path,
+        params: {
+          file_path: selectedFile?.path || "",
+        },
       }),
     queryKey: ["files", selectedFile?.path],
     enabled: !!selectedFile?.path,
@@ -61,6 +67,7 @@ export const CodeViewer: React.FC = () => {
   const lines = file?.content?.split("\n") || [];
   const totalLines = lines.length;
 
+  // Handle Copy
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(file?.content || "");
@@ -70,6 +77,7 @@ export const CodeViewer: React.FC = () => {
     }
   };
 
+  // Handle Download
   const handleDownload = () => {
     const blob = new Blob([file?.content || ""], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
@@ -80,6 +88,7 @@ export const CodeViewer: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
+  // Filtered Lines
   const filteredLines = settings.searchTerm
     ? lines.filter((line, index) =>
         line.toLowerCase().includes(settings.searchTerm.toLowerCase())
@@ -116,7 +125,7 @@ export const CodeViewer: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           {/* Search */}
           <div className="w-full flex items-center justify-between gap-2 max-md:hidden">
             <Button
@@ -144,66 +153,84 @@ export const CodeViewer: React.FC = () => {
             </Button>
           </div>
 
-          {/* Copy to clipboard */}
-          <Button variant="ghost" size="sm" onClick={handleCopy}>
-            <Copy className="h-4 w-4" />
-          </Button>
-
-          {/* Download */}
-          <Button variant="ghost" size="sm" onClick={handleDownload}>
-            <Download className="h-4 w-4" />
-          </Button>
-
-          {/* Settings */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <Settings className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() =>
-                  setSettings((prev) => ({
-                    ...prev,
-                    showLineNumbers: !prev.showLineNumbers,
-                  }))
-                }
-              >
-                {settings.showLineNumbers ? "Hide" : "Show"} Line Numbers
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() =>
-                  setSettings((prev) => ({
-                    ...prev,
-                    wordWrap: !prev.wordWrap,
-                  }))
-                }
-              >
-                {settings.wordWrap ? "Disable" : "Enable"} Word Wrap
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {selectedFile && (
+          <div className="flex items-center">
+            {/* Refresh Button */}
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
-              className="size-7 cursor-pointer hover:text-destructive!"
-              onClick={() => setSelectedFile(null)}
-              title="Close current selected file"
+              onClick={() => refetch()}
+              disabled={isLoading || isFetching}
             >
-              <XIcon className="size-4" />
+              {isLoading || isFetching ? (
+                <InlineLoader
+                  classNames={{
+                    loader: "size-4",
+                  }}
+                />
+              ) : (
+                <RefreshCcw className="size-4" />
+              )}
             </Button>
-          )}
+
+            {/* Copy to clipboard */}
+            <Button variant="ghost" size="sm" onClick={handleCopy}>
+              <Copy className="size-4" />
+            </Button>
+
+            {/* Download */}
+            <Button variant="ghost" size="sm" onClick={handleDownload}>
+              <Download className="h-4 w-4" />
+            </Button>
+
+            {/* Settings */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() =>
+                    setSettings((prev) => ({
+                      ...prev,
+                      showLineNumbers: !prev.showLineNumbers,
+                    }))
+                  }
+                >
+                  {settings.showLineNumbers ? "Hide" : "Show"} Line Numbers
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() =>
+                    setSettings((prev) => ({
+                      ...prev,
+                      wordWrap: !prev.wordWrap,
+                    }))
+                  }
+                >
+                  {settings.wordWrap ? "Disable" : "Enable"} Word Wrap
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {selectedFile && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="size-7 cursor-pointer hover:text-destructive hover:bg-destructive/10!"
+                onClick={() => setSelectedFile(null)}
+                title="Close current selected file"
+              >
+                <XIcon className="size-4" />
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Language Badge */}
-      <div className="px-3 py-1 bg-muted/30 border-b">
-        <span className="text-xs text-muted-foreground">
-          {file?.path || ""}
-        </span>
+      <div className="px-3 py-1.5 bg-muted/30 border-b">
+        <p className="text-sm text-muted-foreground">{file?.path || ""}</p>
       </div>
 
       {/* Code Content */}
@@ -219,16 +246,49 @@ export const CodeViewer: React.FC = () => {
             }}
           />
         ) : isError ? (
-          <div className="p-4 space-y-4">
-            <p className="text-sm text-destructive">{errorMessage(error)}</p>
-            <div className="space-y-5">
-              <h3 className="text-sm font-medium">Host Configuration</h3>
-              <pre>
-                {JSON.stringify(
-                  ls.get("hosts").find((h: any) => h.default),
-                  null,
-                  2
+          <div className="h-full flex flex-col">
+            {/* Error */}
+            <div className="bg-destructive/10 border-b border-destructive/20 px-4 py-3 flex items-center gap-2">
+              <AlertTriangle className="size-5 text-destructive" />
+              <h3 className="font-medium text-destructive">
+                {errorMessage(error)}
+              </h3>
+            </div>
+
+            {/* Host Configuration Title */}
+            <div className="p-4 flex items-center gap-8">
+              <h4 className="text-lg font-medium flex items-center gap-2">
+                <Settings2 className="size-5 text-muted-foreground" />
+                <span>Host Configuration</span>
+              </h4>
+
+              {/* Refresh Button */}
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => refetch()}
+                disabled={isLoading || isFetching}
+              >
+                {isFetching || isLoading ? (
+                  <InlineLoader
+                    loader={{
+                      show: true,
+                      text: "Refreshing...",
+                    }}
+                  />
+                ) : (
+                  <>
+                    <span>Try Refreshing</span>
+                    <RefreshCcw className="size-3.5" />
+                  </>
                 )}
+              </Button>
+            </div>
+
+            {/* Host Configuration */}
+            <div className="flex-1 border-y overflow-auto">
+              <pre className="p-4 text-xs">
+                {JSON.stringify(ls.get("hosts"), null, 2)}
               </pre>
             </div>
           </div>
