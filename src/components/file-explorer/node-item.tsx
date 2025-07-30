@@ -5,8 +5,6 @@ import { ChevronRight, Folder, FolderOpen } from "lucide-react";
 import { File } from "@/types/file.type";
 import { cn } from "@/lib/utils";
 import { FileIcon } from "./file-icon";
-import { truncateString } from "@/lib/utils/helper";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 // File Tree Props Type
 export interface FileExplorerProps {
@@ -69,14 +67,16 @@ export const NodeItem = ({
           )}
 
           {/* File Name */}
-          <Tooltip>
+          <span className="truncate max-w-full">{node.name}</span>
+
+          {/* <Tooltip>
             <TooltipTrigger className="cursor-pointer max-w-full truncate">
               {node.name}
             </TooltipTrigger>
             <TooltipContent className="mx-4">
               <p className="font-semibold">{node.path}</p>
             </TooltipContent>
-          </Tooltip>
+          </Tooltip> */}
         </div>
       </div>
 

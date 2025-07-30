@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { Suspense, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Settings, X } from "lucide-react";
 import {
@@ -13,20 +13,33 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import ConfigurationAndSettings from "@/components/file-explorer/configuration/configuration";
+import { FullScreenLoader } from "@/components/loaders";
+import { useRouter, useSearchParams } from "next/navigation";
 
-// Configuration Dialog
+// Configuration Content
 const Configuration = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const tab = searchParams.get("tab");
+
+  const isOpen = useMemo(() => tab === "config", [tab]);
+
+  // Handle Open Change
+  const handleOpenChange = (open: boolean) => {
+    // Make Url
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", open ? "config" : "");
+    router.push(url.toString());
+  };
 
   return (
     <div className="fixed bottom-2 right-4 z-50">
-      <Dialog>
+      <Dialog open={isOpen} onOpenChange={handleOpenChange}>
         <DialogTrigger asChild>
           <Button
             size={"sm"}
             variant={"outline"}
             id="configuration-button"
-            onClick={() => setIsOpen((prev) => !prev)}
             className="px-4 py-5 bg-accent! group rounded-full cursor-pointer"
           >
             {/* Content */}
@@ -56,4 +69,23 @@ const Configuration = () => {
   );
 };
 
-export default Configuration;
+// Configuration Modal
+export function ConfigurationModal() {
+  return (
+    <Suspense
+      fallback={
+        <FullScreenLoader
+          loader={{
+            show: true,
+            text: "Setting up things for you, Please wait...",
+          }}
+          classNames={{
+            container: "bg-background",
+          }}
+        />
+      }
+    >
+      <Configuration />
+    </Suspense>
+  );
+}

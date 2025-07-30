@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { errorMessage } from "@/lib/utils/helper";
 import { useFilesStore } from "@/stores/files.store";
 import { File } from "@/types/file.type";
+import { Editor } from "@monaco-editor/react";
 import { useQuery } from "@tanstack/react-query";
 import {
   AlertTriangle,
@@ -51,39 +52,38 @@ export const FileExplorer: React.FC = () => {
   };
 
   return (
-    <div className="w-80 border-r bg-muted/30">
-      {/* File Tree Sidebar */}
-      <div className="py-2 px-4 border-b">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <Button
-              variant={"ghost"}
-              className="cursor-pointer"
-              title="Home"
-              asChild
-            >
-              <Link href={"/"}>
-                <MoveLeft className="size-4" />
-              </Link>
-            </Button>
-            <h2 className="font-semibold flex items-center gap-2">
-              <GitBranch className="size-4" />
-              <span>File Explorer</span>
-            </h2>
-          </div>
+    <div className="w-80 flex flex-col justify-between border-r bg-muted/30">
+      <div>
+        {/* File Tree Sidebar */}
+        <div className="py-2 px-4 border-b">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <Button
+                variant={"ghost"}
+                className="cursor-pointer"
+                title="Home"
+                asChild
+              >
+                <Link href={"/"}>
+                  <MoveLeft className="size-4" />
+                </Link>
+              </Button>
+              <h2 className="font-semibold flex items-center gap-2">
+                <GitBranch className="size-4" />
+                <span>File Explorer</span>
+              </h2>
+            </div>
 
-          <div className="flex items-center gap-2">
-            {/* Theme Toggle */}
-            <ThemeToggle />
+            <div className="flex items-center gap-2">
+              {/* Theme Toggle */}
+              <ThemeToggle />
 
-            {/* Refresh Button */}
-            {/* <RefreshButton onClick={() => refetch()} isLoading={isFetching} /> */}
+              {/* Refresh Button */}
+              {/* <RefreshButton onClick={() => refetch()} isLoading={isFetching} /> */}
+            </div>
           </div>
         </div>
-      </div>
-      {/* File Explorer */}
 
-      <div className="h-full">
         {/* Select Default Host */}
         <div
           className={cn(
@@ -153,8 +153,8 @@ export const FileExplorer: React.FC = () => {
           </Button>
         </div>
 
-        {/* File Explorer Content */}
-        <div className="w-full h-[calc(100vh-90px)] overflow-auto thin-scrollbar">
+        {/* File Explorer */}
+        <div className="w-full max-h-[calc(100vh-150px)] overflow-auto thin-scrollbar">
           {isLoading ? (
             <InlineLoader
               loader={{
@@ -162,12 +162,12 @@ export const FileExplorer: React.FC = () => {
                 text: "Getting Files...",
               }}
               classNames={{
-                container: "h-full",
+                container: "py-10",
                 loader: "size-5",
               }}
             />
           ) : isError ? (
-            <div className="h-full flex flex-col">
+            <div className="flex flex-col">
               {/* Error */}
               <div className="bg-destructive/10 border-b border-destructive/20 px-4 py-3 flex items-center gap-2">
                 <AlertTriangle className="size-5 text-destructive" />
@@ -186,17 +186,19 @@ export const FileExplorer: React.FC = () => {
 
               {/* Host Configuration */}
               <div className="h-full overflow-auto">
-                <pre className="p-4 text-sm">
-                  {JSON.stringify(
-                    hosts.find((h) => h.default),
-                    null,
-                    2
-                  )}
-                </pre>
+                <Editor
+                  language="json"
+                  theme="vs-dark"
+                  height={"60vh"}
+                  value={JSON.stringify(hosts, null, 2)}
+                  options={{
+                    minimap: { enabled: false },
+                  }}
+                />
               </div>
             </div>
           ) : (
-            <div className="p-2">
+            <div className="px-2 py-1">
               {data.map((dir: File) => (
                 <NodeItem
                   key={dir.id}
@@ -208,17 +210,19 @@ export const FileExplorer: React.FC = () => {
             </div>
           )}
         </div>
-        <div className="border-t pt-2 text-center text-sm text-muted-foreground">
-          <Link
-            href={"https://abhi.shre.in"}
-            target="_blank"
-            className="flex items-center justify-center gap-2 text-pink-500 hover:text-pink-600 tracking-wide transition-all"
-          >
-            <Copyright className="size-3.5" />
-            <span>Abhishek</span>
-            <ArrowUpRight className="size-4" />
-          </Link>
-        </div>
+      </div>
+
+      {/* Credits */}
+      <div className="border-t py-2.5 text-center text-sm text-muted-foreground">
+        <Link
+          href={"https://abhi.shre.in"}
+          target="_blank"
+          className="flex items-center justify-center gap-2 text-pink-500 hover:text-pink-600 tracking-wide transition-all"
+        >
+          <Copyright className="size-3.5" />
+          <span>Abhishek</span>
+          <ArrowUpRight className="size-4" />
+        </Link>
       </div>
     </div>
   );

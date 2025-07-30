@@ -1,15 +1,14 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import Editor from "@monaco-editor/react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Search,
   Copy,
   Download,
   Settings,
   XIcon,
-  AlertCircle,
   AlertTriangle,
   Settings2,
   RefreshCcw,
@@ -31,7 +30,6 @@ import { FileContent } from "@/types/file.type";
 import { BlockLoader, InlineLoader } from "@/components/loaders";
 import { errorMessage } from "@/lib/utils/helper";
 import { cn } from "@/lib/utils";
-import { ls } from "@/lib/utils/ls";
 
 // CodeViewer component
 export const CodeViewer: React.FC = () => {
@@ -291,25 +289,44 @@ export const CodeViewer: React.FC = () => {
             </div>
           </div>
         ) : (
-          filteredLines.map((line, index) => (
-            <div
-              key={index}
-              className={cn(
-                "flex hover:bg-muted/50",
-                settings.wordWrap ? "whitespace-pre-wrap" : "whitespace-pre"
-              )}
-            >
-              {settings.showLineNumbers && (
-                <pre className="flex-shrink-0 w-12 text-right text-muted-foreground select-none border-r pr-2">
-                  {index + 1}
-                </pre>
-              )}
-              <pre className="flex-1 px-2 py-0.5">{line || "\u00A0"}</pre>
-            </div>
-          ))
+          <Editor
+            value={file?.content || ""}
+            language={detectedLanguage}
+            theme="vs-dark"
+            options={{
+              lineNumbers: settings.showLineNumbers ? "on" : "off",
+              wordWrap: settings.wordWrap ? "on" : "off",
+              minimap: {
+                enabled: true,
+                side: "right",
+                // autohide: true,
+                showSlider: 'always',
+              },
+              fontSize: 15,
+              // fontFamily: "serif",
+              fontWeight: "bold",
+              fontLigatures: true,
+            }}
+          />
         )}
       </div>
 
+      {/* filteredLines.map((line, index) => (
+          <div
+            key={index}
+            className={cn(
+              "flex hover:bg-muted/50",
+              settings.wordWrap ? "whitespace-pre-wrap" : "whitespace-pre"
+            )}
+          >
+            {settings.showLineNumbers && (
+              <pre className="flex-shrink-0 w-12 text-right text-muted-foreground select-none border-r pr-2">
+                {index + 1}
+              </pre>
+            )}
+            <pre className="flex-1 px-2 py-0.5">{line || "\u00A0"}</pre>
+          </div>
+        )) */}
       {/* Footer */}
       <div className="px-3 py-1 bg-muted/30 border-t text-xs">
         <div className="flex items-center gap-4 text-muted-foreground">
