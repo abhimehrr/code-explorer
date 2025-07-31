@@ -1,11 +1,11 @@
-// File Node Type
 export interface File {
   id: string;
   name: string;
   type: "file" | "folder";
+  size?: number;
   path: string;
+  ext?: string;
   children?: File[];
-  fileType?: string;
 }
 
 export interface FileContent {

@@ -1,5 +1,10 @@
 import { cn } from "@/lib/utils";
 import { Code, FileText } from "lucide-react";
+import {
+  DefaultExtensionType,
+  defaultStyles,
+  FileIcon as ReactFileIcon,
+} from "react-file-icon";
 
 /**
  * File extension to language mapping
@@ -131,13 +136,13 @@ export const FileIcon = ({
   className?: string;
 }): React.ReactNode => {
   // Get the file extension
-  const extension = fileName.split(".").pop()?.toLowerCase() || "";
-
-  // Get the file icon config
-  const config =
-    FILE_ICON_MAP.find((icon) => icon.extensions.includes(extension)) ||
-    FILE_ICON_MAP[0];
+  const ext = fileName === ".tsx" ? ".ts" : fileName;
+  const extension = ext.split(".").pop()?.toLowerCase() as DefaultExtensionType;
 
   // Return the file icon
-  return <config.icon className={cn("size-4", config.class, className)} />;
+  return (
+    <span className={cn("size-3.5", className)}>
+      <ReactFileIcon extension={extension} {...defaultStyles[extension]} />
+    </span>
+  );
 };

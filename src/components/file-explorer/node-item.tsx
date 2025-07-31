@@ -63,7 +63,7 @@ export const NodeItem = ({
               <Folder className="size-4 text-yellow-500" />
             )
           ) : (
-            <FileIcon fileName={"node.name.ts"} />
+            <FileIcon fileName={node.name} />
           )}
 
           {/* File Name */}
