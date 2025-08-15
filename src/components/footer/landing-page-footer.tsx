@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { Button } from "../ui/button";
 import { Sparkles } from "lucide-react";
 
+// Footer for the landing page
 export function LandingPageFooter() {
   return (
     <footer className="py-6 bg-accent/30 border-t">
