@@ -43,7 +43,7 @@ export function Navbar() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Desktop Navigation */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 mr-4">
             <NavigationMenu>
               <NavigationMenuList>
                 {/* Docs */}
@@ -58,7 +58,7 @@ export function Navbar() {
                 </NavigationMenuItem>
 
                 {/* Browse */}
-                <NavigationMenuItem>
+                <NavigationMenuItem className="hidden">
                   <NavigationMenuTrigger>Browse</NavigationMenuTrigger>
                   <NavigationMenuContent>
                     <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">

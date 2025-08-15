@@ -1,5 +1,5 @@
+import { LandingPageFooter } from "@/components/footer/landing-page-footer";
 import { Navbar } from "@/components/header/navbar";
-import { ThemeToggle } from "@/components/header/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Code, Sparkles } from "lucide-react";
 import Link from "next/link";
@@ -35,6 +35,9 @@ export default function GlobalLayout({
         </div>
       </div>
       {children}
+
+      {/* Footer */}
+      <LandingPageFooter />
     </div>
   );
 }

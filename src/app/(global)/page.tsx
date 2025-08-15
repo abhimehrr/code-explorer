@@ -2,7 +2,6 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import {
   Code,
-  FolderOpen,
   Cloud,
   GitBranch,
   Search,
@@ -65,7 +64,7 @@ export default function HomePage() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
-          <div className="bg-muted/50 rounded-lg p-6">
+          <div className="p-8 border bg-muted/30 rounded-lg">
             <h3 className="text-xl font-semibold mb-4 flex items-center">
               <Users className="mr-2 h-5 w-5 text-primary" />
               Team Collaboration
@@ -82,7 +81,7 @@ export default function HomePage() {
             </ul>
           </div>
 
-          <div className="bg-muted/50 rounded-lg p-6">
+          <div className="p-8 border bg-muted/30 rounded-lg">
             <h3 className="text-xl font-semibold mb-4 flex items-center">
               <Zap className="mr-2 h-5 w-5 text-primary" />
               Quick Access
@@ -94,7 +93,7 @@ export default function HomePage() {
             </p>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>• Browse local file system</li>
-              <li>• Connect to cloud services (Google Drive, Dropbox)</li>
+              <li>• View code in VS Code</li>
               <li>• Explore Git repositories</li>
             </ul>
           </div>
@@ -105,7 +104,7 @@ export default function HomePage() {
       <div className="py-16">
         <h2 className="text-3xl font-bold text-center mb-12">Features</h2>
         <div className="grid md:grid-cols-3 gap-8">
-          <div className="text-center">
+          <div className="text-center p-8 border bg-muted/30 rounded-lg">
             <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
               <FileText className="h-6 w-6 text-primary" />
             </div>
@@ -115,7 +114,7 @@ export default function HomePage() {
               functionality.
             </p>
           </div>
-          <div className="text-center">
+          <div className="text-center p-8 border bg-muted/30 rounded-lg">
             <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
               <Search className="h-6 w-6 text-primary" />
             </div>
@@ -125,7 +124,7 @@ export default function HomePage() {
               all your sources.
             </p>
           </div>
-          <div className="text-center">
+          <div className="text-center p-8 border bg-muted/30 rounded-lg">
             <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
               <Share2 className="h-6 w-6 text-primary" />
             </div>
